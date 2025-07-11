@@ -1,0 +1,197 @@
+def clear_screen():
+    """Clears the console screen."""
+    import os
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+def get_valid_input(prompt, validation_type, allow_empty=False):
+    """Gets valid input from the user based on validation type."""
+    while True:
+        user_input = input(prompt).strip()
+        if allow_empty and not user_input:
+            return user_input
+
+        if validation_type == 'name':
+            if user_input.replace(' ', '').isalpha():
+                return user_input
+            else:
+                print("Invalid input. Name should only contain alphabetic characters and spaces.")
+        elif validation_type == 'phone':
+            if user_input.isdigit() and len(user_input) >= 7: # Basic phone number validation
+                return user_input
+            else:
+                print("Invalid phone number. Please enter digits only (at least 7).")
+        elif validation_type == 'email':
+            if '@' in user_input and '.' in user_input[user_input.find('@'):]: # Basic email validation
+                return user_input
+            else:
+                print("Invalid email format. Please include '@' and '.'")
+        elif validation_type == 'text':
+            if user_input:
+                return user_input
+            else:
+                print("Input cannot be empty.")
+        else:
+            return user_input # No specific validation
+
+class Contact:
+    """Represents a single contact with name, phone, email, and address."""
+    def __init__(self, name, phone, email, address):
+        self.name = name
+        self.phone = phone
+        self.email = email
+        self.address = address
+
+    def __str__(self):
+        return f"Name: {self.name}\nPhone: {self.phone}\nEmail: {self.email}\nAddress: {self.address}"
+
+class ContactManager:
+    """Manages a collection of contacts."""
+    def __init__(self):
+        self.contacts = []
+
+    def add_contact(self):
+        """Allows users to add new contacts."""
+        clear_screen()
+        print("\n--- Add New Contact ---")
+        name = get_valid_input("Enter name: ", 'name')
+        phone = get_valid_input("Enter phone number: ", 'phone')
+        email = get_valid_input("Enter email address: ", 'email', allow_empty=True)
+        address = get_valid_input("Enter address: ", 'text', allow_empty=True)
+
+        new_contact = Contact(name, phone, email, address)
+        self.contacts.append(new_contact)
+        print("\nContact added successfully!")
+        input("Press Enter to continue...")
+
+    def view_contact_list(self):
+        """Displays a list of all saved contacts with names and phone numbers."""
+        clear_screen()
+        print("\n--- Contact List ---")
+        if not self.contacts:
+            print("No contacts available.")
+        else:
+            for i, contact in enumerate(self.contacts):
+                print(f"{i+1}. Name: {contact.name}, Phone: {contact.phone}")
+        input("\nPress Enter to continue...")
+
+    def search_contact(self):
+        """Implements a search function to find contacts by name or phone number."""
+        clear_screen()
+        print("\n--- Search Contact ---")
+        if not self.contacts:
+            print("No contacts to search.")
+            input("Press Enter to continue...")
+            return
+
+        search_term = input("Enter name or phone number to search: ").strip().lower()
+        found_contacts = []
+        for contact in self.contacts:
+            if search_term in contact.name.lower() or search_term in contact.phone:
+                found_contacts.append(contact)
+
+        if not found_contacts:
+            print("No contacts found matching your search.")
+        else:
+            print("\n--- Search Results ---")
+            for i, contact in enumerate(found_contacts):
+                print(f"\nContact {i+1}:\n{contact}")
+        input("\nPress Enter to continue...")
+
+    def update_contact(self):
+        """Enables users to update contact details."""
+        clear_screen()
+        print("\n--- Update Contact ---")
+        if not self.contacts:
+            print("No contacts to update.")
+            input("Press Enter to continue...")
+            return
+
+        self.view_contact_list()
+        try:
+            choice = int(input("Enter the number of the contact to update: ")) - 1
+            if 0 <= choice < len(self.contacts):
+                contact_to_update = self.contacts[choice]
+                print(f"\nCurrently updating: {contact_to_update.name}")
+
+                print("Enter new details (leave blank to keep current value):")
+                new_name = get_valid_input(f"Enter new name ({contact_to_update.name}): ", 'name', allow_empty=True)
+                if new_name:
+                    contact_to_update.name = new_name
+
+                new_phone = get_valid_input(f"Enter new phone number ({contact_to_update.phone}): ", 'phone', allow_empty=True)
+                if new_phone:
+                    contact_to_update.phone = new_phone
+
+                new_email = get_valid_input(f"Enter new email address ({contact_to_update.email}): ", 'email', allow_empty=True)
+                if new_email:
+                    contact_to_update.email = new_email
+
+                new_address = get_valid_input(f"Enter new address ({contact_to_update.address}): ", 'text', allow_empty=True)
+                if new_address:
+                    contact_to_update.address = new_address
+
+                print("\nContact updated successfully!")
+            else:
+                print("Invalid contact number.")
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+        input("Press Enter to continue...")
+
+    def delete_contact(self):
+        """Provides an option to delete a contact."""
+        clear_screen()
+        print("\n--- Delete Contact ---")
+        if not self.contacts:
+            print("No contacts to delete.")
+            input("Press Enter to continue...")
+            return
+
+        self.view_contact_list()
+        try:
+            choice = int(input("Enter the number of the contact to delete: ")) - 1
+            if 0 <= choice < len(self.contacts):
+                deleted_contact = self.contacts.pop(choice)
+                print(f"Contact '{deleted_contact.name}' deleted successfully!")
+            else:
+                print("Invalid contact number.")
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+        input("Press Enter to continue...")
+
+    def display_menu(self):
+        """Displays the main menu to the user."""
+        clear_screen()
+        print("\n--- Contact Management System ---")
+        print("1. Add Contact")
+        print("2. View Contact List")
+        print("3. Search Contact")
+        print("4. Update Contact")
+        print("5. Delete Contact")
+        print("6. Exit")
+
+    def run(self):
+        """Runs the main contact management application."""
+        while True:
+            self.display_menu()
+            choice = input("Enter your choice (1-6): ").strip()
+
+            if choice == '1':
+                self.add_contact()
+            elif choice == '2':
+                self.view_contact_list()
+            elif choice == '3':
+                self.search_contact()
+            elif choice == '4':
+                self.update_contact()
+            elif choice == '5':
+                self.delete_contact()
+            elif choice == '6':
+                print("Exiting Contact Management System. Goodbye!")
+                break
+            else:
+                print("Invalid choice. Please enter a number between 1 and 6.")
+                input("Press Enter to continue...")
+
+if __name__ == "__main__":
+    manager = ContactManager()
+    manager.run()
